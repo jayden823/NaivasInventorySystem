@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inventory Management</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <nav class="top-nav">
+        <ul>
+          <li class="logo">
+            <img src="/assets/logo.webp" alt="company-logo">
+
+          </li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Services</a></li>
+          <li><a href="#">Contact</a></li>
+          <li class="user-info">
+            <img src="user.jpg" alt="User Image" />
+            <span>Admin</span>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="inventory-container">
+      <!-- Sidebar -->
+      <aside class="sidebar-content">
+        <nav>
+          <ul>
+            <li>Dashboard</li>
+            <li>Inventory</li>
+            <li>Reports</li>
+            <li>Suppliers</li>
+            <li id="manageUsers">Users</li>
+          </ul>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <h1>Dashboard</h1>
+        <p>Welcome to the inventory management system.</p>
+        <!-- Button to open the popup -->
+        <button id="addUserBtn">Add User</button>
+
+        <!-- The Popup Form -->
+        <div id="userPopup" class="popup">
+          <div class="popup-content">
+            <span class="close-btn" id="closePopupBtn">&times;</span>
+            <h2>Add User</h2>
+            <form id="userForm">
+              <label for="username">Username:</label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                required
+              /><br /><br />
+
+              <label for="email">Email:</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                required
+              /><br /><br />
+
+              <label for="role">Role:</label>
+              <select id="role" name="role" required>
+                <option value="admin">Admin</option>
+                <option value="viewer">Viewer</option>
+                <option value="editor">Editor</option></select
+              ><br /><br />
+
+              <button type="submit" id="addUserBtnPopup">Add</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Table to display users -->
+        <div class="user-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Role</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody">
+              <!-- Users will be added here -->
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+
+    <!-- Add User Modal -->
+    <div id="addUserModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Add User</h2>
+        <form id="addUserForm">
+          <input type="text" id="username" placeholder="Full Name" required />
+          <input type="email" id="email" placeholder="Email" required />
+          <select id="role">
+            <option value="Admin">Admin</option>
+            <option value="Editor">Editor</option>
+            <option value="Viewer">Viewer</option>
+          </select>
+          <button type="submit">Add</button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+    // Get DOM elements
+const addUserBtn = document.getElementById("addUserBtn");
+const userPopup = document.getElementById("userPopup");
+const closePopupBtn = document.getElementById("closePopupBtn");
+const userForm = document.getElementById("userForm");
+const userTableBody = document.getElementById("userTableBody");
+
+// Function to open the popup
+addUserBtn.onclick = function () {
+  userPopup.style.display = "flex";
+};
+
+// Function to close the popup
+closePopupBtn.onclick = function () {
+  userPopup.style.display = "none";
+};
+
+// When the user submits the form
+userForm.onsubmit = function (event) {
+  event.preventDefault(); // Prevent the form from refreshing the page
+
+  const username = document.getElementById("username").value;
+  const email = document.getElementById("email").value;
+  const role = document.getElementById("role").value;
+
+  // Generate a random password
+  const password = generateRandomPassword();
+
+  // Prepare the data to send (Fixed key-value mapping)
+  const userData = {
+    username: username,
+    email: email,  // Fixed mapping
+    role: role,    // Fixed mapping
+    password: password, // Fixed mapping
+  };
+
+  // Send data to the backend using fetch API
+  fetch("/add-user", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(userData),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        alert("User added successfully!");
+
+        // Add the new user to the table dynamically
+        const newRow = document.createElement("tr");
+        newRow.innerHTML = `
+            <td>${username}</td>
+            <td>${role}</td>
+        `;
+        userTableBody.appendChild(newRow);
+      } else {
+        alert("Error adding user.");
+      }
+    })
+    .catch((error) => console.error("Error:", error));
+
+  // Close the popup and reset the form
+  userPopup.style.display = "none";
+  userForm.reset();
+};
+
+// Function to generate a random password
+function generateRandomPassword() {
+  const charset =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+  let password = "";
+  for (let i = 0; i < 12; i++) {
+    const randomIndex = Math.floor(Math.random() * charset.length);
+    password += charset[randomIndex];
+  }
+  return password;
+}
+
+    </script>
+  </body>
+</html>
